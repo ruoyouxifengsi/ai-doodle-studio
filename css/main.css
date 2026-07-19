@@ -54,10 +54,12 @@ section.active {
   max-width: 400px;
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 16px;
 }
 
 .scene-card {
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 3 / 4;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
