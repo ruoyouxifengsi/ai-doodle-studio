@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AI 涂鸦画室</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <section id="sceneSelect" class="scene-select active">
+    <h1 class="screen-title">选一个场景</h1>
+    <div class="scene-grid"></div>
+  </section>
+
+  <section id="canvasPage" class="canvas-page">
+    <div class="canvas-header">
+      <button class="btn-back">&larr; 返回</button>
+      <span class="canvas-scene-name"></span>
+    </div>
+    <div class="canvas-wrapper"></div>
+  </section>
+
+  <section id="resultPage" class="result-page">
+    <div class="result-placeholder">结果页（待 Day 4 实现）</div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/fabric@5/dist/fabric.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
