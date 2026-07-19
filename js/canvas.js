@@ -23,13 +23,17 @@ export function initCanvas(containerEl, sceneId) {
   const fitCanvas = () => {
     const maxW = containerEl.clientWidth - 16;
     const maxH = containerEl.clientHeight - 16;
+    if (maxW <= 0 || maxH <= 0) return;
     const scale = Math.min(maxW / CANVAS_WIDTH, maxH / CANVAS_HEIGHT);
     fabricCanvas.setZoom(scale);
     fabricCanvas.setWidth(CANVAS_WIDTH * scale);
     fabricCanvas.setHeight(CANVAS_HEIGHT * scale);
+    fabricCanvas.renderAll();
   };
 
-  fitCanvas();
+  requestAnimationFrame(() => {
+    fitCanvas();
+  });
   window.addEventListener('resize', fitCanvas);
 
   return fabricCanvas;
