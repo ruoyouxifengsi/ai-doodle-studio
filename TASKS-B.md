@@ -169,7 +169,7 @@
 
 ## 每天下班前
 
-- `git commit` + `git push` 到你的分支
+- `git commit` + `git push`（直接推 main，不开分支）
 - 群里发一句进展 + 明天要做什么
 - 超预算就说
 
