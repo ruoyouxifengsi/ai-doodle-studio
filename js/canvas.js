@@ -20,6 +20,29 @@ export function initCanvas(containerEl, sceneId) {
   fabricCanvas.freeDrawingBrush.color = DEFAULT_BRUSH_COLOR;
   fabricCanvas.freeDrawingBrush.width = DEFAULT_BRUSH_WIDTH;
 
+  fabricCanvas._undoStack = [];
+  fabricCanvas.on('path:created', (e) => {
+    fabricCanvas._undoStack.push(e.path);
+  });
+
+  fabricCanvas.setColor = (hex) => {
+    fabricCanvas.freeDrawingBrush.color = hex;
+  };
+
+  fabricCanvas.undo = () => {
+    const path = fabricCanvas._undoStack.pop();
+    if (path) {
+      fabricCanvas.remove(path);
+      fabricCanvas.renderAll();
+    }
+  };
+
+  fabricCanvas.clearDrawing = () => {
+    const paths = fabricCanvas._undoStack.splice(0);
+    paths.forEach(p => fabricCanvas.remove(p));
+    fabricCanvas.renderAll();
+  };
+
   const fitCanvas = () => {
     const maxW = containerEl.clientWidth - 16;
     const maxH = containerEl.clientHeight - 16;

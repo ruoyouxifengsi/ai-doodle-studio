@@ -42,4 +42,27 @@ document.querySelector('.btn-back').addEventListener('click', () => {
   showScreen('sceneSelect');
 });
 
+document.querySelector('.canvas-toolbar').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || !currentCanvas) return;
+
+  if (btn.classList.contains('color-dot')) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+    btn.classList.add('active');
+    currentCanvas.setColor(btn.dataset.color);
+  }
+
+  if (btn.classList.contains('btn-undo')) {
+    currentCanvas.undo();
+  }
+
+  if (btn.classList.contains('btn-clear')) {
+    currentCanvas.clearDrawing();
+  }
+
+  if (btn.classList.contains('btn-generate')) {
+    // Day 3 接入
+  }
+});
+
 renderSceneCards();
