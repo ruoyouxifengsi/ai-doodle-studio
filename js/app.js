@@ -28,6 +28,8 @@ function renderSceneCards() {
     card.addEventListener('click', () => {
       document.querySelector('.canvas-scene-name').textContent = scene.name;
       showScreen('canvasPage');
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      document.querySelector('.color-dot--black').classList.add('active');
       currentCanvas = initCanvas(document.querySelector('.canvas-wrapper'), scene.id);
     });
     grid.appendChild(card);
