@@ -1,13 +1,16 @@
 import { SCENES } from './scenes.js';
 import { initCanvas } from './canvas.js';
+import { generateImage } from './api.js';
 
 const sections = {
   sceneSelect: document.getElementById('sceneSelect'),
   canvasPage: document.getElementById('canvasPage'),
+  loadingPage: document.getElementById('loadingPage'),
   resultPage: document.getElementById('resultPage'),
 };
 
 let currentCanvas = null;
+let currentSceneId = null;
 
 function showScreen(name) {
   Object.values(sections).forEach(el => el.classList.remove('active'));
@@ -27,6 +30,7 @@ function renderSceneCards() {
     `;
     card.addEventListener('click', () => {
       document.querySelector('.canvas-scene-name').textContent = scene.name;
+      currentSceneId = scene.id;
       showScreen('canvasPage');
       document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
       document.querySelector('.color-dot--black').classList.add('active');
@@ -38,7 +42,7 @@ function renderSceneCards() {
 
 document.querySelector('.btn-back').addEventListener('click', () => {
   if (currentCanvas) {
-    currentCanvas.dispose();
+    currentCanvas.cleanup();
     currentCanvas = null;
   }
   showScreen('sceneSelect');
@@ -63,7 +67,23 @@ document.querySelector('.canvas-toolbar').addEventListener('click', (e) => {
   }
 
   if (btn.classList.contains('btn-generate')) {
-    // Day 3 接入
+    const canvasBase64 = currentCanvas.toDataURL('image/png');
+    showScreen('loadingPage');
+    generateImage(canvasBase64, currentSceneId)
+      .then(data => {
+        if (data.success) {
+          document.querySelector('.result-image').src = data.image_url;
+          document.querySelector('.result-placeholder').style.display = 'none';
+          showScreen('resultPage');
+        } else {
+          alert(data.error_message || '生成失败，请重试');
+          showScreen('canvasPage');
+        }
+      })
+      .catch(() => {
+        alert('网络出错，请重试');
+        showScreen('canvasPage');
+      });
   }
 });
 
