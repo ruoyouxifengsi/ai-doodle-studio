@@ -16,7 +16,7 @@
 - **CSS**：原生 CSS，禁止 Tailwind、UnoCSS、Sass、Less
 - **响应式**：mobile-first + `@media (min-width: 768px)`
 - **后端**：Cloudflare Worker（`worker/` 目录）
-- **AI API**：阿里通义万相 wanx-v1 img2img
+- **AI API**：阿里通义万相 wanx2.1-imageedit（stylization_all 全局风格化，收 base64）
 - **部署**：GitHub Pages（`canvas.xinlu-ai.xin`）+ Cloudflare Worker（`api.xinlu-ai.xin`）
 - **主域名**：`xinlu-ai.xin`（owner 已购买）
 

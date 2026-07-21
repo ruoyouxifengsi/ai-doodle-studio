@@ -6,6 +6,14 @@ const MOCK_IMAGE_URL = 'https://picsum.photos/seed/xinlu-mock/720/1280'
 
 const MAX_CANVAS_BYTES = 2 * 1024 * 1024
 
+const DASHSCOPE_CREATE_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/image2image/image-synthesis'
+const DASHSCOPE_TASK_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks/'
+const WANX_MODEL = 'wanx2.1-imageedit'
+const WANX_FUNCTION = 'stylization_all'
+const TEST_PROMPT = 'children book illustration, warm colors, cute style'
+const OVERALL_TIMEOUT_MS = 30000
+const POLL_INTERVAL_MS = 2000
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') return corsPreflight(request)
@@ -43,8 +51,108 @@ export default {
       })
     }
 
-    return jsonError(request, 500, 'API_ERROR', '真实 API 待 Day 2 接入')
+    const apiKey = env.DASHSCOPE_API_KEY
+    if (!apiKey) {
+      return jsonError(request, 500, 'API_ERROR', '服务未配置密钥')
+    }
+
+    try {
+      const imageUrl = await callWanx(body.canvas_image, TEST_PROMPT, apiKey)
+      return jsonSuccess(request, {
+        image_url: imageUrl,
+        request_id: crypto.randomUUID(),
+      })
+    } catch (err) {
+      const code = err.code || 'API_ERROR'
+      return jsonError(request, 200, code, err.message || 'AI 累了休息一下，请稍后重试')
+    }
   },
+}
+
+async function callWanx(baseImage, prompt, apiKey) {
+  const deadline = Date.now() + OVERALL_TIMEOUT_MS
+
+  const createRes = await fetchWithTimeout(
+    DASHSCOPE_CREATE_URL,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'X-DashScope-Async': 'enable',
+      },
+      body: JSON.stringify({
+        model: WANX_MODEL,
+        input: { function: WANX_FUNCTION, prompt, base_image_url: baseImage },
+        parameters: { n: 1, strength: 0.5 },
+      }),
+    },
+    remaining(deadline),
+  )
+
+  const createData = await createRes.json().catch(() => null)
+  const taskId = createData && createData.output && createData.output.task_id
+  if (!createRes.ok || !taskId) {
+    throw upstreamError('API_ERROR', 'AI 累了休息一下，请稍后重试')
+  }
+
+  while (Date.now() < deadline) {
+    await sleep(POLL_INTERVAL_MS)
+    const pollRes = await fetchWithTimeout(
+      DASHSCOPE_TASK_URL + taskId,
+      { headers: { Authorization: `Bearer ${apiKey}` } },
+      remaining(deadline),
+    )
+    const pollData = await pollRes.json().catch(() => null)
+    const output = pollData && pollData.output
+    const status = output && output.task_status
+
+    if (status === 'SUCCEEDED') {
+      const url = output.results && output.results[0] && output.results[0].url
+      if (!url) throw upstreamError('API_ERROR', 'AI 累了休息一下，请稍后重试')
+      return url
+    }
+    if (status === 'FAILED' || status === 'CANCELED' || status === 'UNKNOWN') {
+      if (isContentUnsafe(output)) throw upstreamError('CONTENT_UNSAFE', '再画一张试试')
+      throw upstreamError('API_ERROR', 'AI 累了休息一下，请稍后重试')
+    }
+  }
+
+  throw upstreamError('API_TIMEOUT', '网络慢，请重试')
+}
+
+function remaining(deadline) {
+  return Math.max(0, deadline - Date.now())
+}
+
+function upstreamError(code, message) {
+  const e = new Error(message)
+  e.code = code
+  return e
+}
+
+function isContentUnsafe(output) {
+  const code = ((output && output.code) || '').toLowerCase()
+  const msg = ((output && output.message) || '').toLowerCase()
+  return (
+    code.includes('inspection') ||
+    code.includes('safety') ||
+    msg.includes('inspection') ||
+    msg.includes('safety') ||
+    msg.includes('risk') ||
+    msg.includes('敏感') ||
+    msg.includes('违规')
+  )
+}
+
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), Math.max(1000, timeoutMs))
+  try {
+    return await fetch(url, { ...options, signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 function isAllowedOrigin(origin) {
