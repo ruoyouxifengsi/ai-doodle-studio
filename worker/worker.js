@@ -10,9 +10,22 @@ const DASHSCOPE_CREATE_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aig
 const DASHSCOPE_TASK_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks/'
 const WANX_MODEL = 'wanx2.1-imageedit'
 const WANX_FUNCTION = 'stylization_all'
-const TEST_PROMPT = 'children book illustration, warm colors, cute style'
 const OVERALL_TIMEOUT_MS = 30000
 const POLL_INTERVAL_MS = 2000
+
+const STYLE_CORE =
+  'cute children picture book illustration, clean bold outlines, flat bright cheerful colors, simple kawaii shapes, smooth clean coloring, safe for young kids'
+
+const SCENE_PROMPTS = {
+  seaside: `${STYLE_CORE}, warm sunny seaside palette`,
+  forest: `${STYLE_CORE}, fresh green forest palette`,
+  space: `${STYLE_CORE}, deep starry night palette`,
+  park: `${STYLE_CORE}, sunny green park palette`,
+  home: `${STYLE_CORE}, cozy warm indoor palette`,
+  school: `${STYLE_CORE}, bright friendly classroom palette`,
+}
+
+const DEFAULT_STRENGTH = 0.5
 
 export default {
   async fetch(request, env, ctx) {
@@ -38,6 +51,11 @@ export default {
       return jsonError(request, 400, 'INVALID_INPUT', '缺少必填字段')
     }
 
+    const scenePrompt = SCENE_PROMPTS[body.scene_id]
+    if (!scenePrompt) {
+      return jsonError(request, 400, 'INVALID_INPUT', '场景不存在')
+    }
+
     if (typeof body.canvas_image !== 'string' || body.canvas_image.length > MAX_CANVAS_BYTES) {
       return jsonError(request, 400, 'INVALID_INPUT', '画布图片超限或格式错')
     }
@@ -56,8 +74,13 @@ export default {
       return jsonError(request, 500, 'API_ERROR', '服务未配置密钥')
     }
 
+    let strength = DEFAULT_STRENGTH
+    if (typeof body.strength === 'number' && body.strength >= 0 && body.strength <= 1) {
+      strength = body.strength
+    }
+
     try {
-      const imageUrl = await callWanx(body.canvas_image, TEST_PROMPT, apiKey)
+      const imageUrl = await callWanx(body.canvas_image, scenePrompt, strength, apiKey)
       return jsonSuccess(request, {
         image_url: imageUrl,
         request_id: crypto.randomUUID(),
@@ -69,7 +92,7 @@ export default {
   },
 }
 
-async function callWanx(baseImage, prompt, apiKey) {
+async function callWanx(baseImage, prompt, strength, apiKey) {
   const deadline = Date.now() + OVERALL_TIMEOUT_MS
 
   const createRes = await fetchWithTimeout(
@@ -84,7 +107,7 @@ async function callWanx(baseImage, prompt, apiKey) {
       body: JSON.stringify({
         model: WANX_MODEL,
         input: { function: WANX_FUNCTION, prompt, base_image_url: baseImage },
-        parameters: { n: 1, strength: 0.5 },
+        parameters: { n: 1, strength },
       }),
     },
     remaining(deadline),
