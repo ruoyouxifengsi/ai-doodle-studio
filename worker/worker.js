@@ -12,6 +12,9 @@ const WANX_MODEL = 'wanx2.1-imageedit'
 const WANX_FUNCTION = 'stylization_all'
 const OVERALL_TIMEOUT_MS = 30000
 const POLL_INTERVAL_MS = 2000
+const RATE_LIMIT_WINDOW_MS = 60000
+const RATE_LIMIT_MAX = 10
+const rateBuckets = new Map()
 
 const STYLE_CORE =
   'cute children picture book illustration, clean bold outlines, flat bright cheerful colors, simple kawaii shapes, smooth clean coloring, safe for young kids'
@@ -49,6 +52,10 @@ export default {
       return jsonError(request, 400, 'INVALID_INPUT', '路径不存在')
     }
 
+    if (!consumeRateLimit(request)) {
+      return jsonError(request, 429, 'RATE_LIMIT', '请稍等 30 秒')
+    }
+
     let body
     try {
       body = await request.json()
@@ -70,7 +77,8 @@ export default {
       return jsonError(request, 400, 'INVALID_INPUT', '暂不支持该绘画风格')
     }
 
-    if (typeof body.canvas_image !== 'string' || body.canvas_image.length > MAX_CANVAS_BYTES) {
+    const canvasBytes = getCanvasBytes(body.canvas_image)
+    if (canvasBytes === null || canvasBytes === 0 || canvasBytes > MAX_CANVAS_BYTES) {
       return jsonError(request, 400, 'INVALID_INPUT', '画布图片超限或格式错')
     }
 
@@ -94,7 +102,7 @@ export default {
     }
 
     try {
-      const imageUrl = await callWanx(body.canvas_image, scenePrompt, strength, apiKey)
+      const imageUrl = await callWanxWithRetry(body.canvas_image, scenePrompt, strength, apiKey)
       return jsonSuccess(request, {
         image_url: imageUrl,
         request_id: crypto.randomUUID(),
@@ -106,9 +114,25 @@ export default {
   },
 }
 
-async function callWanx(baseImage, prompt, strength, apiKey) {
+async function callWanxWithRetry(baseImage, prompt, strength, apiKey) {
   const deadline = Date.now() + OVERALL_TIMEOUT_MS
+  let lastError
 
+  for (let attempt = 0; attempt < 2 && Date.now() < deadline; attempt += 1) {
+    try {
+      return await callWanx(baseImage, prompt, strength, apiKey, deadline)
+    } catch (err) {
+      const code = err.code || 'API_ERROR'
+      lastError = err.code ? err : upstreamError(code, 'AI 累了休息一下，请稍后重试')
+      if (code !== 'API_ERROR' || attempt === 1) throw lastError
+      await sleep(500)
+    }
+  }
+
+  throw lastError || upstreamError('API_TIMEOUT', '网络慢，请重试')
+}
+
+async function callWanx(baseImage, prompt, strength, apiKey, deadline) {
   const createRes = await fetchWithTimeout(
     DASHSCOPE_CREATE_URL,
     {
@@ -130,6 +154,7 @@ async function callWanx(baseImage, prompt, strength, apiKey) {
   const createData = await createRes.json().catch(() => null)
   const taskId = createData && createData.output && createData.output.task_id
   if (!createRes.ok || !taskId) {
+    if (isContentUnsafe(createData)) throw upstreamError('CONTENT_UNSAFE', '再画一张试试')
     throw upstreamError('API_ERROR', 'AI 累了休息一下，请稍后重试')
   }
 
@@ -169,17 +194,16 @@ function upstreamError(code, message) {
 }
 
 function isContentUnsafe(output) {
-  const code = ((output && output.code) || '').toLowerCase()
-  const msg = ((output && output.message) || '').toLowerCase()
-  return (
-    code.includes('inspection') ||
-    code.includes('safety') ||
-    msg.includes('inspection') ||
-    msg.includes('safety') ||
-    msg.includes('risk') ||
-    msg.includes('敏感') ||
-    msg.includes('违规')
-  )
+  const text = JSON.stringify(output || {}).toLowerCase()
+  return [
+    'inspection',
+    'safety',
+    'risk',
+    'inappropriate',
+    'nsfw',
+    '敏感',
+    '违规',
+  ].some((keyword) => text.includes(keyword))
 }
 
 async function fetchWithTimeout(url, options, timeoutMs) {
@@ -187,9 +211,46 @@ async function fetchWithTimeout(url, options, timeoutMs) {
   const timer = setTimeout(() => controller.abort(), Math.max(1000, timeoutMs))
   try {
     return await fetch(url, { ...options, signal: controller.signal })
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      throw upstreamError('API_TIMEOUT', '网络慢，请重试')
+    }
+    throw err
   } finally {
     clearTimeout(timer)
   }
+}
+
+function getCanvasBytes(canvasImage) {
+  if (typeof canvasImage !== 'string') return null
+  const match = canvasImage.match(/^data:image\/png;base64,([A-Za-z0-9+/\s]+={0,2})$/)
+  if (!match) return null
+  const base64 = match[1].replace(/\s/g, '')
+  if (!base64 || base64.length % 4 !== 0) return null
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0
+  return Math.floor((base64.length * 3) / 4) - padding
+}
+
+function consumeRateLimit(request) {
+  const forwarded = request.headers.get('X-Forwarded-For') || ''
+  const ip = request.headers.get('CF-Connecting-IP') || forwarded.split(',')[0].trim() || 'local'
+  const now = Date.now()
+
+  if (rateBuckets.size > 1000) {
+    for (const [key, value] of rateBuckets) {
+      if (now - value.startedAt >= RATE_LIMIT_WINDOW_MS) rateBuckets.delete(key)
+    }
+  }
+
+  const bucket = rateBuckets.get(ip)
+
+  if (!bucket || now - bucket.startedAt >= RATE_LIMIT_WINDOW_MS) {
+    rateBuckets.set(ip, { startedAt: now, count: 1 })
+    return true
+  }
+
+  bucket.count += 1
+  return bucket.count <= RATE_LIMIT_MAX
 }
 
 function isAllowedOrigin(origin) {
