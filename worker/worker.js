@@ -25,7 +25,16 @@ const SCENE_PROMPTS = {
   school: `${STYLE_CORE}, bright friendly classroom palette`,
 }
 
-const DEFAULT_STRENGTH = 0.5
+const SCENE_STRENGTHS = {
+  seaside: 0.5,
+  forest: 0.5,
+  space: 0.5,
+  park: 0.5,
+  home: 0.5,
+  school: 0.5,
+}
+
+const IMPLEMENTED_STYLE_VARIANT = 'cartoon'
 
 export default {
   async fetch(request, env, ctx) {
@@ -56,6 +65,11 @@ export default {
       return jsonError(request, 400, 'INVALID_INPUT', '场景不存在')
     }
 
+    const styleVariant = body.style_variant || IMPLEMENTED_STYLE_VARIANT
+    if (styleVariant !== IMPLEMENTED_STYLE_VARIANT) {
+      return jsonError(request, 400, 'INVALID_INPUT', '暂不支持该绘画风格')
+    }
+
     if (typeof body.canvas_image !== 'string' || body.canvas_image.length > MAX_CANVAS_BYTES) {
       return jsonError(request, 400, 'INVALID_INPUT', '画布图片超限或格式错')
     }
@@ -74,7 +88,7 @@ export default {
       return jsonError(request, 500, 'API_ERROR', '服务未配置密钥')
     }
 
-    let strength = DEFAULT_STRENGTH
+    let strength = SCENE_STRENGTHS[body.scene_id]
     if (typeof body.strength === 'number' && body.strength >= 0 && body.strength <= 1) {
       strength = body.strength
     }
