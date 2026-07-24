@@ -9,10 +9,15 @@ const sections = {
   resultPage: document.getElementById('resultPage'),
 };
 
+const state = {
+  currentScreen: 'sceneSelect',
+};
+
 let currentCanvas = null;
 let currentSceneId = null;
 
 function showScreen(name) {
+  state.currentScreen = name;
   Object.values(sections).forEach(el => el.classList.remove('active'));
   sections[name].classList.add('active');
 }
@@ -73,7 +78,6 @@ document.querySelector('.canvas-toolbar').addEventListener('click', (e) => {
       .then(data => {
         if (data.success) {
           document.querySelector('.result-image').src = data.image_url;
-          document.querySelector('.result-placeholder').style.display = 'none';
           showScreen('resultPage');
         } else {
           alert(data.error_message || '生成失败，请重试');
@@ -84,6 +88,26 @@ document.querySelector('.canvas-toolbar').addEventListener('click', (e) => {
         alert('网络出错，请重试');
         showScreen('canvasPage');
       });
+  }
+});
+
+document.querySelector('.result-actions').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+
+  if (btn.classList.contains('btn-redraw')) {
+    if (currentCanvas) {
+      currentCanvas.clearDrawing();
+    }
+    showScreen('canvasPage');
+  }
+
+  if (btn.classList.contains('btn-print')) {
+    window.print();
+  }
+
+  if (btn.classList.contains('btn-save-qr')) {
+    alert('二维码保存功能稍后开放');
   }
 });
 
