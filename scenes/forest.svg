@@ -1,4 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" width="720" height="1280">
-  <rect width="720" height="1280" fill="#66bb6a"/>
-  <text x="360" y="640" text-anchor="middle" fill="#fff" font-size="48" font-family="sans-serif">🌳 森林</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#f2fbf1"/>
+  <g fill="none" stroke="#78909c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <circle cx="565" cy="175" r="65"/>
+    <path d="M0 920c150-70 300-70 450 0s220 65 270 35"/>
+    <path d="M95 850V470m-100 110 100-210 100 210zm15-110 105-195 105 195z"/>
+    <path d="M405 870V530m-95 90 95-205 95 205zm20-105 100-185 100 185z"/>
+    <path d="M570 910V610m-80 70 80-170 80 170z"/>
+    <path d="M260 1040c55-85 105-85 155 0m-80-20v-115"/>
+  </g>
 </svg>

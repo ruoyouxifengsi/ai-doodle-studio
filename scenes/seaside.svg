@@ -1,4 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" width="720" height="1280">
-  <rect width="720" height="1280" fill="#4fc3f7"/>
-  <text x="360" y="640" text-anchor="middle" fill="#fff" font-size="48" font-family="sans-serif">🌊 海边</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#eef9ff"/>
+  <g fill="none" stroke="#78909c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <circle cx="570" cy="190" r="72"/>
+    <path d="M80 300c45-50 90-50 135 0m-68-24c45-50 90-50 135 0"/>
+    <path d="M0 600c110-55 215-55 320 0s215 55 400 0"/>
+    <path d="M0 690c130-55 250-55 360 0s220 55 360 0"/>
+    <path d="M0 830c145-70 295-70 450 0s220 70 270 60"/>
+    <path d="M110 990l110-150 110 150z"/>
+    <path d="M165 920h110m-55-80v150"/>
+  </g>
 </svg>

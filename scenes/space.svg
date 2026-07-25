@@ -1,4 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" width="720" height="1280">
-  <rect width="720" height="1280" fill="#7e57c2"/>
-  <text x="360" y="640" text-anchor="middle" fill="#fff" font-size="48" font-family="sans-serif">🚀 太空</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#f3f1ff"/>
+  <g fill="none" stroke="#78909c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <circle cx="525" cy="250" r="120"/>
+    <ellipse cx="525" cy="250" rx="190" ry="52" transform="rotate(-18 525 250)"/>
+    <circle cx="165" cy="500" r="82"/>
+    <path d="M145 425c10 65 40 110 98 135"/>
+    <path d="M350 760l72-115 72 115-20 165h-104z"/>
+    <path d="M370 905l-45 80 65-25m84-55 45 80-65-25"/>
+    <circle cx="422" cy="760" r="28"/>
+    <path d="M100 180l12 30 32 4-24 21 7 32-27-17-28 17 8-32-25-21 33-4zm170 170 9 22 24 3-18 16 5 24-20-13-21 13 6-24-19-16 25-3z"/>
+    <path d="M90 1100c160-90 370-90 540 0"/>
+  </g>
 </svg>

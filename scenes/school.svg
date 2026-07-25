@@ -1,4 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" width="720" height="1280">
-  <rect width="720" height="1280" fill="#ef5350"/>
-  <text x="360" y="640" text-anchor="middle" fill="#fff" font-size="48" font-family="sans-serif">📚 校园</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#fff6f2"/>
+  <g fill="none" stroke="#78909c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <circle cx="575" cy="160" r="62"/>
+    <path d="M80 295c45-45 90-45 135 0m-65-22c45-45 90-45 135 0"/>
+    <path d="M90 600h540v395H90z"/>
+    <path d="M60 600l300-185 300 185"/>
+    <path d="M300 995V800h120v195"/>
+    <rect x="145" y="690" width="95" height="85"/>
+    <rect x="480" y="690" width="95" height="85"/>
+    <path d="M0 1035h720"/>
+    <path d="M105 1150c100-70 205-70 315 0s205 65 300 15"/>
+    <path d="M565 590V390m0 0 110 45-110 45"/>
+  </g>
 </svg>

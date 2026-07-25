@@ -1,4 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" width="720" height="1280">
-  <rect width="720" height="1280" fill="#ffb74d"/>
-  <text x="360" y="640" text-anchor="middle" fill="#fff" font-size="48" font-family="sans-serif">🏠 家</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#fff8ee"/>
+  <g fill="none" stroke="#78909c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".72">
+    <circle cx="565" cy="175" r="65"/>
+    <path d="M70 320c45-45 90-45 135 0m-65-22c45-45 90-45 135 0"/>
+    <path d="M85 720l275-250 275 250"/>
+    <path d="M145 665v360h430V665"/>
+    <path d="M305 1025V790h120v235"/>
+    <rect x="190" y="750" width="85" height="100" rx="5"/>
+    <rect x="465" y="750" width="85" height="100" rx="5"/>
+    <path d="M0 1050c180-65 360-65 540 0s145 45 180 30"/>
+    <path d="M90 1040v-160m-60 50 60-125 60 125z"/>
+  </g>
 </svg>
