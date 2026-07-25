@@ -4,7 +4,7 @@
 
 ## 产品定义
 
-孩子在手机上打开 H5 网页，从 6 个场景里选一个，进入画布看到场景剪影，用手指涂鸦叠加，点"生成"后 10-15 秒 AI 出图，可保存/打印。
+孩子在手机上打开 H5 网页，从 6 个场景里选一个，在浅色纯色画布上用手指涂鸦，生成前选择 1-3 个"我画了什么"语义标签，点"生成"后 AI 根据场景、标签和涂鸦轮廓出图，可保存/打印。
 
 ## 明确不做
 
@@ -15,31 +15,32 @@
 - 后台管理
 - 作品长期存储（隐私 + 合规）
 
-## 用户旅程（4 屏）
+## 用户旅程（4 屏 + 1 个标签浮层）
 
 1. **首页**：6 张场景大图，孩子点一个进入
-2. **画布页**：显示场景剪影作底图，孩子在上层涂鸦，底部工具栏（4-6 个颜色 + 撤销 + 清空 + 生成）
-3. **加载页**：等待 10-15 秒，卡通角色 + 进度动画
-4. **结果页**：全屏 AI 生成图 + 底部按钮（保存二维码 + 重画 + 打印）
+2. **画布页**：显示浅色纯色背景，孩子自由涂鸦，底部工具栏（4-6 个颜色 + 撤销 + 清空 + 生成）
+3. **标签浮层**：点击生成后选择 1-3 个场景对应标签，说明"我画了什么"
+4. **加载页**：等待 10-30 秒，卡通角色 + 进度动画
+5. **结果页**：全屏 AI 生成图 + 底部按钮（保存二维码 + 重画 + 打印）
 
-## 场景模板（锁死 6 个）
+## 场景与语义标签（锁死 6 个）
 
-| id | 中文名 | 剪影文件 | prompt 主关键词（给 B） |
-|----|--------|---------|---------------------|
-| seaside | 海边 | `scenes/seaside.svg` | ocean, sandy beach, seagulls, sunny |
-| forest | 森林 | `scenes/forest.svg` | forest, tall trees, sunlight through leaves |
-| space | 太空 | `scenes/space.svg` | outer space, planets, stars, spaceship |
-| park | 公园 | `scenes/park.svg` | park, green lawn, benches, flowers |
-| home | 家 | `scenes/home.svg` | cozy living room, warm light, furniture |
-| school | 校园 | `scenes/school.svg` | schoolyard, classroom, blackboard, children |
+| id | 中文名 | 可选标签（接口值） |
+|----|--------|------------------|
+| seaside | 海边 | 太阳 `sun`、船 `boat`、鱼 `fish`、螃蟹 `crab`、人物 `person` |
+| forest | 森林 | 树 `tree`、花草 `flower_grass`、四脚动物 `quadruped_animal`、鸟 `bird`、人物 `person` |
+| space | 太空 | 宇航员 `astronaut`、火箭 `rocket`、星球 `planet`、外星人 `alien`、星星 `star` |
+| park | 公园 | 树 `tree`、花草 `flower_grass`、人物 `person`、小狗 `dog`、长椅 `bench` |
+| home | 家 | 人物 `person`、宠物 `pet`、家具 `furniture`、房子 `house`、玩具 `toy` |
+| school | 校园 | 人物 `person`、教学楼 `school_building`、球 `ball`、树 `tree`、书本 `book` |
 
-具体 prompt 细节由 B 在 `worker/worker.js` 里维护。A 只用 id 引用，不关心 prompt 内容。
+每次必须选择 1-3 个标签。具体 prompt 细节由 B 在 `worker/worker.js` 里维护。
 
 ## 画布规范
 
 - 尺寸：宽 720px × 高 1280px（9:16 竖屏，固定）
-- 底图：场景剪影 SVG，不可编辑，锁定为背景
-- 涂鸦层：孩子只在上层画
+- 底图：场景对应的浅色纯色背景，不加载 SVG 剪影
+- 涂鸦层：孩子在纯色背景上自由画
 - 颜色：4-6 个预设色块（红/黄/蓝/绿/黑/棕），不做自由取色
 - 笔刷：单一粗细（5px 左右），不做粗细选择
 
@@ -53,14 +54,16 @@
 {
   "canvas_image": "data:image/png;base64,iVBOR...",
   "scene_id": "seaside",
+  "object_tags": ["boat", "person"],
   "style_variant": "cartoon"
 }
 ```
 
 字段：
 
-- `canvas_image`：base64 编码的画布 PNG，含涂鸦叠加在剪影上的完整画面。大小 ≤ 2 MB
+- `canvas_image`：base64 编码的画布 PNG，含浅色纯色背景和涂鸦。大小 ≤ 2 MB
 - `scene_id`：见场景表，固定 6 个之一
+- `object_tags`：字符串数组；必须选择当前场景允许的 1-3 个标签，不允许重复
 - `style_variant`：`cartoon` | `watercolor` | `pixel`。第一版只实现 `cartoon`，另两个是接口预留
 
 **Response 成功**（HTTP 200）：
@@ -126,7 +129,6 @@ A 在 B 没搭好前，全程用 mock 联调前端。B 搭好真 API 后，A 去
 
 ## 遗留（遇到问人）
 
-- 场景剪影 SVG 谁画/找/买——群里定
 - 卡通引导角色 PNG 谁提供——群里定
 - 打印链路（社区打印机型号）——队长现场确认
 - 儿童图像授权书——队长跟街道办确认

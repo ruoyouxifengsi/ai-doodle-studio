@@ -28,6 +28,41 @@ const SCENE_PROMPTS = {
   school: `${STYLE_CORE}，明亮友好的校园，有教学楼、操场和树木`,
 }
 
+const TAG_PROMPTS = {
+  sun: '太阳',
+  boat: '船',
+  fish: '鱼',
+  crab: '螃蟹',
+  person: '人物（保留头部、身体和四肢）',
+  tree: '树木（保留树干和树冠）',
+  flower_grass: '花草',
+  quadruped_animal: '四脚动物（保留身体、头部、四条腿和尾巴）',
+  bird: '鸟',
+  astronaut: '宇航员',
+  rocket: '火箭',
+  planet: '星球',
+  alien: '外星人',
+  star: '星星',
+  dog: '小狗（保留身体、头部、四条腿和尾巴）',
+  bench: '长椅',
+  pet: '宠物',
+  furniture: '家具',
+  house: '房子',
+  toy: '玩具',
+  school_building: '教学楼',
+  ball: '球',
+  book: '书本',
+}
+
+const SCENE_TAGS = {
+  seaside: ['sun', 'boat', 'fish', 'crab', 'person'],
+  forest: ['tree', 'flower_grass', 'quadruped_animal', 'bird', 'person'],
+  space: ['astronaut', 'rocket', 'planet', 'alien', 'star'],
+  park: ['tree', 'flower_grass', 'person', 'dog', 'bench'],
+  home: ['person', 'pet', 'furniture', 'house', 'toy'],
+  school: ['person', 'school_building', 'ball', 'tree', 'book'],
+}
+
 const IMPLEMENTED_STYLE_VARIANT = 'cartoon'
 
 export default {
@@ -58,10 +93,15 @@ export default {
       return jsonError(request, 400, 'INVALID_INPUT', '缺少必填字段')
     }
 
-    const scenePrompt = SCENE_PROMPTS[body.scene_id]
-    if (!scenePrompt) {
+    if (!SCENE_PROMPTS[body.scene_id]) {
       return jsonError(request, 400, 'INVALID_INPUT', '场景不存在')
     }
+
+    const objectTags = validateObjectTags(body.scene_id, body.object_tags)
+    if (!objectTags) {
+      return jsonError(request, 400, 'INVALID_INPUT', '请选择 1 至 3 个画面内容')
+    }
+    const scenePrompt = buildScenePrompt(body.scene_id, objectTags)
 
     const styleVariant = body.style_variant || IMPLEMENTED_STYLE_VARIANT
     if (styleVariant !== IMPLEMENTED_STYLE_VARIANT) {
@@ -131,7 +171,7 @@ async function callWanx(baseImage, prompt, apiKey, deadline) {
       body: JSON.stringify({
         model: WANX_MODEL,
         input: { function: WANX_FUNCTION, prompt, base_image_url: baseImage },
-        parameters: { n: 1, is_sketch: false },
+        parameters: { n: 1, is_sketch: true },
       }),
     },
     remaining(deadline),
@@ -171,6 +211,21 @@ async function callWanx(baseImage, prompt, apiKey, deadline) {
 
 function remaining(deadline) {
   return Math.max(0, deadline - Date.now())
+}
+
+function validateObjectTags(sceneId, tags) {
+  if (!Array.isArray(tags) || tags.length < 1 || tags.length > 3) return null
+  if (tags.some((tag) => typeof tag !== 'string')) return null
+  const uniqueTags = [...new Set(tags)]
+  if (uniqueTags.length !== tags.length) return null
+  const allowedTags = SCENE_TAGS[sceneId]
+  if (!allowedTags || uniqueTags.some((tag) => !allowedTags.includes(tag))) return null
+  return uniqueTags
+}
+
+function buildScenePrompt(sceneId, tags) {
+  const objects = tags.map((tag) => TAG_PROMPTS[tag]).join('、')
+  return `${SCENE_PROMPTS[sceneId]}。输入涂鸦明确包含：${objects}。必须按照原位置和轮廓识别这些内容，不得忽略、替换或改成其他物体，再将它们绘本化并自然融入场景`
 }
 
 function upstreamError(code, message) {

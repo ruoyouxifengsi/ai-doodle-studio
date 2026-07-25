@@ -2,6 +2,15 @@
 
 > 你（KY）的 7 天任务。搭档在前端并行。别改 `index.html`、`css/`、`js/`。
 
+## 当前改版规则（覆盖下方旧模型要求）
+
+- AI 功能固定为 `wanx2.1-imageedit` 的 `doodle`
+- `parameters.is_sketch` 固定为 `true`
+- 请求必须包含当前场景允许的 `object_tags`，1-3 个且不重复
+- Worker 根据 `scene_id + object_tags` 动态拼接 prompt
+- 不再使用 `stylization_all`、`strength` 或场景剪影输入逻辑
+- 标签白名单与接口格式以 `SPEC.md` 为准
+
 ## 开工前（Day 0）
 
 1. 读完 `CLAUDE.md` 和 `SPEC.md`

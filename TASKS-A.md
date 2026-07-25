@@ -2,6 +2,60 @@
 
 > 你的 7 天任务。粒度到"改哪个文件、加什么函数、验收标准"。不加没列的功能。不改 `worker/`。
 
+## 当前改版任务：纯色画布 + 语义标签
+
+本节覆盖下方旧任务中"加载场景剪影 SVG 作底图"的要求。其他禁止清单继续有效。
+
+### 只允许修改
+
+- `index.html`
+- `css/main.css` 或 `css/screens.css`
+- `js/app.js`
+- `js/canvas.js`
+- `js/scenes.js`
+- `js/api.js`
+
+### 要做
+
+1. `js/canvas.js`
+   - 不再加载 `scenes/<id>.svg`
+   - 画布按场景显示浅色纯色背景
+   - 建议颜色：海边 `#eef9ff`、森林 `#f2fbf1`、太空 `#f3f1ff`、公园 `#f5fbef`、家 `#fff8ee`、校园 `#fff6f2`
+   - 导出仍固定为 720×1280 PNG
+
+2. `js/scenes.js`
+   - 每个场景增加 `tags` 数组
+   - 标签 id 和中文名必须完全照 `SPEC.md`，不要自创、改名或翻译
+
+3. `index.html` + CSS
+   - 点击"生成"后先弹出标签浮层
+   - 标题："你画了什么？"
+   - 副文案："选 1-3 个，让 AI 更懂你的画"
+   - 显示当前场景的 5 个大按钮
+   - 已选按钮有明显状态
+   - 未选标签时"开始生成"按钮禁用
+   - 最多选 3 个，选第 4 个时不改变状态
+   - 提供取消按钮，返回画布且不丢失涂鸦
+
+4. `js/api.js`
+   - `generateImage` 新增 `objectTags` 参数
+   - 请求体新增 `object_tags: objectTags`
+   - 不增加新请求头，不改 API 地址
+
+5. `js/app.js`
+   - 原"生成"按钮只打开标签浮层，不立即请求 API
+   - 浮层确认后导出画布并调用 `generateImage(canvasBase64, sceneId, selectedTags)`
+   - 请求开始后清空本次标签选择状态
+
+### 验收
+
+- 森林场景画布是浅色纯色，没有 SVG 线稿
+- 选择森林后只显示：树、花草、四脚动物、鸟、人物
+- 选 0 个不能生成；选 1-3 个可以；不能选第 4 个
+- 请求 JSON 含 `object_tags`
+- 完整流程能拿到真实 AI 结果
+- 不修改 `worker/`、`SPEC.md`、`CLAUDE.md`
+
 ## 开工前（Day 0）
 
 1. 读完 `CLAUDE.md` 和 `SPEC.md`

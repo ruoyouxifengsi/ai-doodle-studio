@@ -4,7 +4,7 @@
 
 ## 项目是什么
 
-儿童 AI 涂鸦画室：一个手机 H5 网页，孩子在预设场景剪影上涂鸦，Cloudflare Worker 代理调用通义万相 img2img，输出儿童插画，可打印。
+儿童 AI 涂鸦画室：一个手机 H5 网页，孩子选择场景后在浅色纯色画布上涂鸦，再选择 1-3 个"我画了什么"语义标签，Cloudflare Worker 调用通义万相输出儿童插画，可打印。
 
 服务对象：暑期托管班的 30 个 2-3 年级随迁子女。摇篮杯参赛技术产品。
 
@@ -16,7 +16,7 @@
 - **CSS**：原生 CSS，禁止 Tailwind、UnoCSS、Sass、Less
 - **响应式**：mobile-first + `@media (min-width: 768px)`
 - **后端**：Cloudflare Worker（`worker/` 目录）
-- **AI API**：阿里通义万相 wanx2.1-imageedit（stylization_all 全局风格化，收 base64）
+- **AI API**：阿里通义万相 wanx2.1-imageedit（doodle 涂鸦作画，`is_sketch: true`，收 base64）
 - **部署**：GitHub Pages（`canvas.xinlu-ai.xin`）+ Cloudflare Worker（`api.xinlu-ai.xin`）
 - **主域名**：`xinlu-ai.xin`（owner 已购买）
 
@@ -31,7 +31,7 @@
 │   ├── canvas.js         fabric.js 画布模块
 │   ├── scenes.js         场景元数据
 │   └── api.js            调用 Worker 的 fetch 封装
-├── scenes/               6 个 SVG 剪影
+├── scenes/               旧场景 SVG（保留，但画布不再加载）
 ├── worker/
 │   ├── worker.js
 │   └── wrangler.toml
