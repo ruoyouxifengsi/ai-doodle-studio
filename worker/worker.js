@@ -9,7 +9,7 @@ const MAX_CANVAS_BYTES = 2 * 1024 * 1024
 const DASHSCOPE_CREATE_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/image2image/image-synthesis'
 const DASHSCOPE_TASK_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks/'
 const WANX_MODEL = 'wanx2.1-imageedit'
-const WANX_FUNCTION = 'stylization_all'
+const WANX_FUNCTION = 'doodle'
 const OVERALL_TIMEOUT_MS = 30000
 const POLL_INTERVAL_MS = 2000
 const RATE_LIMIT_WINDOW_MS = 60000
@@ -17,24 +17,15 @@ const RATE_LIMIT_MAX = 10
 const rateBuckets = new Map()
 
 const STYLE_CORE =
-  'transform the rough child doodle into a polished children picture book illustration while preserving the original composition and recognizable drawn elements, clean bold outlines, flat bright cheerful colors, simple kawaii shapes, smooth complete coloring, add coherent background details, safe for young kids'
+  '儿童绘本插画，保留涂鸦的主体、位置和轮廓，补充完整细节，线条清晰，色彩明亮，画面温暖可爱，适合低年级儿童'
 
 const SCENE_PROMPTS = {
-  seaside: `${STYLE_CORE}, warm sunny seaside palette`,
-  forest: `${STYLE_CORE}, fresh green forest palette`,
-  space: `${STYLE_CORE}, deep starry night palette`,
-  park: `${STYLE_CORE}, sunny green park palette`,
-  home: `${STYLE_CORE}, cozy warm indoor palette`,
-  school: `${STYLE_CORE}, bright friendly classroom palette`,
-}
-
-const SCENE_STRENGTHS = {
-  seaside: 0.65,
-  forest: 0.65,
-  space: 0.65,
-  park: 0.65,
-  home: 0.65,
-  school: 0.65,
+  seaside: `${STYLE_CORE}，阳光下的海边，有蓝色海水、沙滩和天空`,
+  forest: `${STYLE_CORE}，生机勃勃的森林，有树木、草地和阳光`,
+  space: `${STYLE_CORE}，奇妙的太空，有星球、星星和深蓝色宇宙`,
+  park: `${STYLE_CORE}，晴朗的社区公园，有树木、草地、道路和天空`,
+  home: `${STYLE_CORE}，温馨的家，有房屋、家具和生活气息`,
+  school: `${STYLE_CORE}，明亮友好的校园，有教学楼、操场和树木`,
 }
 
 const IMPLEMENTED_STYLE_VARIANT = 'cartoon'
@@ -96,13 +87,8 @@ export default {
       return jsonError(request, 500, 'API_ERROR', '服务未配置密钥')
     }
 
-    let strength = SCENE_STRENGTHS[body.scene_id]
-    if (typeof body.strength === 'number' && body.strength >= 0 && body.strength <= 1) {
-      strength = body.strength
-    }
-
     try {
-      const imageUrl = await callWanxWithRetry(body.canvas_image, scenePrompt, strength, apiKey)
+      const imageUrl = await callWanxWithRetry(body.canvas_image, scenePrompt, apiKey)
       return jsonSuccess(request, {
         image_url: imageUrl,
         request_id: crypto.randomUUID(),
@@ -114,13 +100,13 @@ export default {
   },
 }
 
-async function callWanxWithRetry(baseImage, prompt, strength, apiKey) {
+async function callWanxWithRetry(baseImage, prompt, apiKey) {
   const deadline = Date.now() + OVERALL_TIMEOUT_MS
   let lastError
 
   for (let attempt = 0; attempt < 2 && Date.now() < deadline; attempt += 1) {
     try {
-      return await callWanx(baseImage, prompt, strength, apiKey, deadline)
+      return await callWanx(baseImage, prompt, apiKey, deadline)
     } catch (err) {
       const code = err.code || 'API_ERROR'
       lastError = err.code ? err : upstreamError(code, 'AI 累了休息一下，请稍后重试')
@@ -132,7 +118,7 @@ async function callWanxWithRetry(baseImage, prompt, strength, apiKey) {
   throw lastError || upstreamError('API_TIMEOUT', '网络慢，请重试')
 }
 
-async function callWanx(baseImage, prompt, strength, apiKey, deadline) {
+async function callWanx(baseImage, prompt, apiKey, deadline) {
   const createRes = await fetchWithTimeout(
     DASHSCOPE_CREATE_URL,
     {
@@ -145,7 +131,7 @@ async function callWanx(baseImage, prompt, strength, apiKey, deadline) {
       body: JSON.stringify({
         model: WANX_MODEL,
         input: { function: WANX_FUNCTION, prompt, base_image_url: baseImage },
-        parameters: { n: 1, strength },
+        parameters: { n: 1, is_sketch: true },
       }),
     },
     remaining(deadline),
