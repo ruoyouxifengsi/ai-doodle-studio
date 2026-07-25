@@ -17,7 +17,7 @@ const RATE_LIMIT_MAX = 10
 const rateBuckets = new Map()
 
 const STYLE_CORE =
-  'cute children picture book illustration, clean bold outlines, flat bright cheerful colors, simple kawaii shapes, smooth clean coloring, safe for young kids'
+  'transform the rough child doodle into a polished children picture book illustration while preserving the original composition and recognizable drawn elements, clean bold outlines, flat bright cheerful colors, simple kawaii shapes, smooth complete coloring, add coherent background details, safe for young kids'
 
 const SCENE_PROMPTS = {
   seaside: `${STYLE_CORE}, warm sunny seaside palette`,
@@ -29,12 +29,12 @@ const SCENE_PROMPTS = {
 }
 
 const SCENE_STRENGTHS = {
-  seaside: 0.5,
-  forest: 0.5,
-  space: 0.5,
-  park: 0.5,
-  home: 0.5,
-  school: 0.5,
+  seaside: 0.65,
+  forest: 0.65,
+  space: 0.65,
+  park: 0.65,
+  home: 0.65,
+  school: 0.65,
 }
 
 const IMPLEMENTED_STYLE_VARIANT = 'cartoon'
