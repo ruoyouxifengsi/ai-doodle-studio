@@ -5,7 +5,6 @@ export async function generateImage(canvasBase64, sceneId, styleVariant = 'carto
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Mock': 'true',
     },
     body: JSON.stringify({
       canvas_image: canvasBase64,

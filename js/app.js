@@ -15,6 +15,7 @@ const state = {
 
 let currentCanvas = null;
 let currentSceneId = null;
+let currentImageUrl = null;
 
 function showScreen(name) {
   state.currentScreen = name;
@@ -72,12 +73,24 @@ document.querySelector('.canvas-toolbar').addEventListener('click', (e) => {
   }
 
   if (btn.classList.contains('btn-generate')) {
-    const canvasBase64 = currentCanvas.toDataURL('image/png');
+    const prevZoom = currentCanvas.getZoom();
+    const prevW = currentCanvas.width;
+    const prevH = currentCanvas.height;
+    currentCanvas.setZoom(1);
+    currentCanvas.setWidth(720);
+    currentCanvas.setHeight(1280);
+    currentCanvas.renderAll();
+    const canvasBase64 = currentCanvas.toDataURL({ format: 'png', multiplier: 1 });
+    currentCanvas.setZoom(prevZoom);
+    currentCanvas.setWidth(prevW);
+    currentCanvas.setHeight(prevH);
+    currentCanvas.renderAll();
     showScreen('loadingPage');
     generateImage(canvasBase64, currentSceneId)
       .then(data => {
         if (data.success) {
-          document.querySelector('.result-image').src = data.image_url;
+          currentImageUrl = data.image_url;
+          document.querySelector('.result-image').src = currentImageUrl;
           showScreen('resultPage');
         } else {
           alert(data.error_message || '生成失败，请重试');
@@ -107,8 +120,18 @@ document.querySelector('.result-actions').addEventListener('click', (e) => {
   }
 
   if (btn.classList.contains('btn-save-qr')) {
-    alert('二维码保存功能稍后开放');
+    if (!currentImageUrl) return;
+    const modal = document.getElementById('qrModal');
+    const qrCanvas = modal.querySelector('.qr-canvas');
+    QRCode.toCanvas(qrCanvas, currentImageUrl, { width: 240 });
+    modal.classList.add('active');
   }
 });
 
 renderSceneCards();
+
+document.getElementById('qrModal').addEventListener('click', (e) => {
+  if (e.target.classList.contains('qr-modal-mask') || e.target.classList.contains('qr-modal-close')) {
+    document.getElementById('qrModal').classList.remove('active');
+  }
+});

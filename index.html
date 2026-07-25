@@ -56,7 +56,18 @@
     </div>
   </section>
 
+  <div id="qrModal" class="qr-modal">
+    <div class="qr-modal-mask"></div>
+    <div class="qr-modal-content">
+      <p class="qr-modal-title">扫码保存图片</p>
+      <canvas class="qr-canvas"></canvas>
+      <p class="qr-modal-hint">打开相机或扫码工具对准二维码<br>扫码后长按图片保存到相册</p>
+      <button class="qr-modal-close">关闭</button>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/fabric@5/dist/fabric.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5/build/qrcode.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
