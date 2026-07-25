@@ -131,7 +131,7 @@ async function callWanx(baseImage, prompt, apiKey, deadline) {
       body: JSON.stringify({
         model: WANX_MODEL,
         input: { function: WANX_FUNCTION, prompt, base_image_url: baseImage },
-        parameters: { n: 1, is_sketch: true },
+        parameters: { n: 1, is_sketch: false },
       }),
     },
     remaining(deadline),
