@@ -3,7 +3,7 @@ const CANVAS_HEIGHT = 1280;
 const DEFAULT_BRUSH_COLOR = '#000000';
 const DEFAULT_BRUSH_WIDTH = 5;
 
-export function initCanvas(containerEl, sceneId) {
+export function initCanvas(containerEl, sceneId, bgColor) {
   containerEl.innerHTML = '';
 
   const canvasEl = document.createElement('canvas');
@@ -14,7 +14,7 @@ export function initCanvas(containerEl, sceneId) {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     isDrawingMode: true,
-    backgroundColor: '#ffffff',
+    backgroundColor: bgColor || '#ffffff',
   });
 
   fabricCanvas.freeDrawingBrush.color = DEFAULT_BRUSH_COLOR;
@@ -42,26 +42,6 @@ export function initCanvas(containerEl, sceneId) {
     paths.forEach(p => fabricCanvas.remove(p));
     fabricCanvas.renderAll();
   };
-
-  fabric.Image.fromURL(`scenes/${sceneId}.svg`, (img) => {
-    img.set({
-      selectable: false,
-      evented: false,
-      left: 0,
-      top: 0,
-    });
-    const scaleX = CANVAS_WIDTH / img.width;
-    const scaleY = CANVAS_HEIGHT / img.height;
-    const scale = Math.min(scaleX, scaleY);
-    img.scaleX = scale;
-    img.scaleY = scale;
-    img.left = (CANVAS_WIDTH - img.width * scale) / 2;
-    img.top = (CANVAS_HEIGHT - img.height * scale) / 2;
-    fabricCanvas.add(img);
-    fabricCanvas.sendToBack(img);
-    fabricCanvas._silhouette = img;
-    fabricCanvas.renderAll();
-  });
 
   const fitCanvas = () => {
     const maxW = containerEl.clientWidth - 16;
