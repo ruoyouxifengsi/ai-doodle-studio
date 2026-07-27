@@ -154,7 +154,7 @@
 
 - `index.html`：
   - 加载页：卡通角色 PNG + "AI 正在画..." + CSS 旋转动画
-  - 结果页：全屏图（`object-fit: contain`）+ 底部按钮（保存二维码 / 重画 / 打印）
+  - 结果页：全屏图（`object-fit: contain`）+ 底部按钮（保存二维码 / 继续修改 / 打印）；继续修改必须保留原笔迹
 - `css/main.css`：加载动画只用 CSS `@keyframes`，不引 JS 动画库
 - `js/app.js`：把三屏切换封装成 `showScreen(name)`，`state.currentScreen` 追踪
 

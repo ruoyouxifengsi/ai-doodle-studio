@@ -83,9 +83,6 @@ document.querySelector('.result-actions').addEventListener('click', (e) => {
   if (!btn) return;
 
   if (btn.classList.contains('btn-redraw')) {
-    if (currentCanvas) {
-      currentCanvas.clearDrawing();
-    }
     showScreen('canvasPage');
   }
 
