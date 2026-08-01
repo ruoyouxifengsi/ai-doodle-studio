@@ -29,11 +29,17 @@ function renderSceneCards() {
   grid.innerHTML = '';
 
   SCENES.forEach(scene => {
-    const card = document.createElement('div');
+    const card = document.createElement('button');
+    card.type = 'button';
     card.className = `scene-card scene-card--${scene.id}`;
-    card.style.background = scene.bgColor;
+    card.style.setProperty('--scene-bg', scene.bgColor);
     card.innerHTML = `
-      <span class="scene-name">${scene.name}</span>
+      <span class="scene-icon" aria-hidden="true">${scene.icon}</span>
+      <span class="scene-card-copy">
+        <span class="scene-name">${scene.name}</span>
+        <span class="scene-hint">${scene.hint}</span>
+      </span>
+      <span class="scene-arrow" aria-hidden="true">→</span>
     `;
     card.addEventListener('click', () => {
       document.querySelector('.canvas-scene-name').textContent = scene.name;

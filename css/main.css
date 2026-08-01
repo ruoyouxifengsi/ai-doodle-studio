@@ -33,75 +33,139 @@ section.active {
 
 /* === 首页：场景选择 === */
 .scene-select {
-  background: #fff8f0;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 190, 125, 0.2), transparent 24%),
+    radial-gradient(circle at 92% 18%, rgba(126, 201, 255, 0.18), transparent 26%),
+    #fffaf4;
   align-items: center;
-  padding: 24px 16px;
+  padding: clamp(24px, 5vw, 56px) 16px 32px;
+  overflow-y: auto;
+}
+
+.scene-hero {
+  width: 100%;
+  max-width: 880px;
+  margin-bottom: clamp(24px, 4vw, 38px);
+  text-align: center;
+}
+
+.scene-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid rgba(232, 123, 53, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #c86a2f;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .screen-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #e87b35;
-  margin-bottom: 24px;
+  margin-top: 14px;
+  font-size: clamp(30px, 7vw, 48px);
+  font-weight: 800;
+  color: #3f352f;
+  letter-spacing: -0.04em;
   text-align: center;
+}
+
+.scene-subtitle {
+  margin-top: 10px;
+  color: #8a7568;
+  font-size: clamp(15px, 3.5vw, 18px);
+  line-height: 1.6;
 }
 
 .scene-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  max-width: 400px;
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 16px;
+  max-width: 460px;
 }
 
 .scene-card {
   position: relative;
-  height: 0;
-  padding-bottom: 133.33%;
-  border-radius: 16px;
+  display: flex;
+  min-width: 0;
+  min-height: 164px;
+  padding: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  border: 1px solid rgba(80, 65, 55, 0.06);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.45), transparent 60%), var(--scene-bg);
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform 0.15s;
+  box-shadow: 0 10px 24px rgba(102, 76, 59, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
   overflow: hidden;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 .scene-card:active {
   transform: scale(0.96);
 }
 
-.scene-card img {
+.scene-card::after {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 110px;
+  height: 110px;
+  right: -38px;
+  top: -42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.scene-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 5px 5px rgba(70, 50, 38, 0.12));
+}
+
+.scene-card-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .scene-card .scene-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #43372f;
+}
+
+.scene-hint {
+  overflow: hidden;
+  color: #75665d;
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-arrow {
   position: absolute;
-  bottom: 12px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  z-index: 1;
+  right: 16px;
+  bottom: 15px;
+  color: rgba(67, 55, 47, 0.45);
   font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 /* 每个场景卡片的底色（与 SVG 占位色一致） */
-.scene-card--seaside { background: #4fc3f7; }
-.scene-card--forest  { background: #66bb6a; }
-.scene-card--space   { background: #7e57c2; }
-.scene-card--park    { background: #9ccc65; }
-.scene-card--home    { background: #ffb74d; }
-.scene-card--school  { background: #ef5350; }
+.scene-card:focus-visible {
+  outline: 4px solid rgba(232, 123, 53, 0.28);
+  outline-offset: 3px;
+}
 
 /* === 画布页 === */
 .canvas-page {
@@ -237,10 +301,36 @@ section.active {
 @media (min-width: 768px) {
   .scene-grid {
     grid-template-columns: repeat(3, 1fr);
-    max-width: 600px;
+    gap: 20px;
+    max-width: 880px;
   }
 
-  .screen-title {
-    font-size: 36px;
+  .scene-card {
+    min-height: 210px;
+    padding: 24px;
+    border-radius: 28px;
+  }
+
+  .scene-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 30px rgba(102, 76, 59, 0.13);
+  }
+
+  .scene-icon {
+    font-size: 58px;
+  }
+
+  .scene-card .scene-name {
+    font-size: 26px;
+  }
+
+  .scene-hint {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-card {
+    transition: none;
   }
 }
